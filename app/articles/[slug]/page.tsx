@@ -6,14 +6,14 @@ import { formatDate } from "@/components/ArticleCard";
 import { MdxContent } from "@/components/MdxContent";
 import { getAllArticles, getArticle } from "@/lib/content";
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
   return getAllArticles().map(({ slug }) => ({ slug }));
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const slug = params.slug;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
   const article = getArticle(slug);
   if (!article) return {};
   return {
@@ -31,8 +31,9 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function ArticlePage({ params }: Props) {
-  const article = getArticle(params.slug);
+export default async function ArticlePage({ params }: Props) {
+  const { slug } = await params;
+  const article = getArticle(slug);
   if (!article) notFound();
 
   return (

@@ -35,7 +35,8 @@ const components = {
     return isInternal
       ? <Link href={href} {...props}>{children}</Link>
       : <a {...props} href={href} target="_blank" rel="noreferrer noopener">{children}</a>;
-  }
+  },
+};
 
 export function MdxContent({ source }: { source: string }) {
   return <MDXRemote source={source} components={components} />;

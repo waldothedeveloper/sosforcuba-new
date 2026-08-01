@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/ArticleCard";
 import { articlesForTag, getAllTags } from "@/lib/content";
 
-type Props = { params: { tag: string } };
+type Props = { params: Promise<{ tag: string }> };
 
 const safeDecode = (value: string) => {
   try {
@@ -18,12 +18,14 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const decoded = safeDecode(params.tag);
-  return { title: `Articles tagged ${decoded ?? params.tag}` };
+  const { tag } = await params;
+  const decoded = safeDecode(tag);
+  return { title: `Articles tagged ${decoded ?? tag}` };
 }
 
 export default async function TagPage({ params }: Props) {
-  const decoded = safeDecode(params.tag);
+  const { tag } = await params;
+  const decoded = safeDecode(tag);
   if (!decoded) notFound();
   const articles = articlesForTag(decoded);
   return (
