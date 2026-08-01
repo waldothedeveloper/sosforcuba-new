@@ -17,7 +17,7 @@ export function ArticleCard({ article, priority = false }: { article: ArticleMet
       <div className="card-body">
         <div className="card-meta">
           <time dateTime={article.date}>{formatDate(article.date)}</time>
-          <span>{article.tags[0]}</span>
+          {article.tags[0] ? <span>{article.tags[0]}</span> : null}
         </div>
         <h3><Link href={`/articles/${article.slug}`}>{article.title}</Link></h3>
         <p>{article.description}</p>
