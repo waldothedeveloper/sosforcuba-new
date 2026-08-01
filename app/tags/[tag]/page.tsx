@@ -1,21 +1,30 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/ArticleCard";
 import { articlesForTag, getAllTags } from "@/lib/content";
 
-type Props = { params: Promise<{ tag: string }> };
+type Props = { params: { tag: string } };
+
+const safeDecode = (value: string) => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
+};
 
 export function generateStaticParams() {
   return getAllTags().map((tag) => ({ tag: tag.toLowerCase() }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { tag } = await params;
-  return { title: `Articles tagged ${decodeURIComponent(tag)}` };
+  const decoded = safeDecode(params.tag);
+  return { title: `Articles tagged ${decoded ?? params.tag}` };
 }
 
 export default async function TagPage({ params }: Props) {
-  const { tag } = await params;
-  const decoded = decodeURIComponent(tag);
+  const decoded = safeDecode(params.tag);
+  if (!decoded) notFound();
   const articles = articlesForTag(decoded);
   return (
     <main className="section shell">
