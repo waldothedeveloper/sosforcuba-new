@@ -30,9 +30,12 @@ const components = {
   Video,
   Callout,
   SourceLink,
-  a: ({ href = "", children }: React.AnchorHTMLAttributes<HTMLAnchorElement>) =>
-    href.startsWith("/") ? <Link href={href}>{children}</Link> : <a href={href} target="_blank" rel="noreferrer noopener">{children}</a>
-};
+  a: ({ href = "", children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+    const isInternal = href.startsWith("/") && !href.startsWith("//");
+    return isInternal
+      ? <Link href={href} {...props}>{children}</Link>
+      : <a {...props} href={href} target="_blank" rel="noreferrer noopener">{children}</a>;
+  }
 
 export function MdxContent({ source }: { source: string }) {
   return <MDXRemote source={source} components={components} />;
