@@ -6,27 +6,33 @@ import { formatDate } from "@/components/ArticleCard";
 import { MdxContent } from "@/components/MdxContent";
 import { getAllArticles, getArticle } from "@/lib/content";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = { params: { slug: string } };
 
 export function generateStaticParams() {
   return getAllArticles().map(({ slug }) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+export function generateMetadata({ params }: Props): Metadata {
+  const slug = params.slug;
   const article = getArticle(slug);
   if (!article) return {};
   return {
     title: article.title,
     description: article.description,
     alternates: { canonical: `/articles/${slug}` },
-    openGraph: { type: "article", title: article.title, description: article.description, publishedTime: article.date, modifiedTime: article.updated, images: [{ url: article.cover, alt: article.coverAlt }] }
+    openGraph: {
+      type: "article",
+      title: article.title,
+      description: article.description,
+      publishedTime: article.date,
+      modifiedTime: article.updated,
+      images: [{ url: article.cover, alt: article.coverAlt }]
+    }
   };
 }
 
-export default async function ArticlePage({ params }: Props) {
-  const { slug } = await params;
-  const article = getArticle(slug);
+export default function ArticlePage({ params }: Props) {
+  const article = getArticle(params.slug);
   if (!article) notFound();
 
   return (
