@@ -68,4 +68,4 @@ English source lives under `content/en`. Add translated material under `content/
 
 ## Media
 
-Legacy images are preserved under `public/media/legacy`. The specific 2020 COVID image and Gatsby starter artwork were not migrated. Some archived images are intentionally unused by the current pages but remain available for future editorial work.
+Images used by the migrated pages are preserved under `public/media/legacy`. The specific 2020 COVID image, Gatsby starter artwork, unused form artwork, and graphic images that are not presented in this edition were not migrated; the original repository remains the complete legacy archive.

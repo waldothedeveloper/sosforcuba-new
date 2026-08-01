@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound() { return <main className="not-found shell narrow"><p className="eyebrow">404</p><h1>This page could not be found.</h1><p>The old site has been reorganized. Try the article archive or return home.</p><div><Link className="button primary" href="/articles">Browse articles</Link> <Link className="button ink" href="/">Go home</Link></div></main>; }
