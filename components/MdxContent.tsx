@@ -32,9 +32,12 @@ const components = {
   SourceLink,
   a: ({ href = "", children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
     const isInternal = href.startsWith("/") && !href.startsWith("//");
-    return isInternal
-      ? <Link href={href} {...props}>{children}</Link>
-      : <a {...props} href={href} target="_blank" rel="noreferrer noopener">{children}</a>;
+    if (isInternal) return <Link href={href} {...props}>{children}</Link>;
+    // Only web links open in a new tab; in-page anchors (#), mailto:, and tel: stay put.
+    const isExternal = /^(https?:)?\/\//i.test(href);
+    return isExternal
+      ? <a {...props} href={href} target="_blank" rel="noreferrer noopener">{children}</a>
+      : <a {...props} href={href}>{children}</a>;
   },
 };
 

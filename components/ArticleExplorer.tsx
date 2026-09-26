@@ -33,7 +33,7 @@ export function ArticleExplorer({ articles }: { articles: ArticleMeta[] }) {
             placeholder="Search topics, people, or events"
           />
         </label>
-        <div className="tag-filter" aria-label="Filter articles by topic">
+        <div className="tag-filter" role="group" aria-label="Filter articles by topic">
           {tags.map((candidate) => (
             <button
               type="button"
