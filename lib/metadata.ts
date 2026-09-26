@@ -17,7 +17,7 @@ export function pageMetadata({ title, description, path, image, openGraph = { ty
   return {
     title,
     description,
-    alternates: { canonical: path },
+    alternates: { canonical: path, types: { "application/rss+xml": "/feed.xml" } },
     openGraph: {
       ...openGraph,
       title,

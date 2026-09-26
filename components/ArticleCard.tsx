@@ -5,7 +5,7 @@ import type { ArticleMeta } from "@/lib/content";
 export function ArticleCard({ article, priority = false }: { article: ArticleMeta; priority?: boolean }) {
   return (
     <article className="article-card">
-      <Link className="card-image" href={`/articles/${article.slug}`} tabIndex={-1} aria-hidden="true">
+      <div className="card-image">
         <Image
           src={article.cover}
           alt={article.coverAlt}
@@ -13,7 +13,7 @@ export function ArticleCard({ article, priority = false }: { article: ArticleMet
           sizes="(max-width: 760px) 100vw, 33vw"
           priority={priority}
         />
-      </Link>
+      </div>
       <div className="card-body">
         <div className="card-meta">
           <time dateTime={article.date}>{formatDate(article.date)}</time>
