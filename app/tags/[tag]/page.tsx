@@ -6,10 +6,6 @@ import { pageMetadata } from "@/lib/metadata";
 
 type Props = { params: Promise<{ tag: string }> };
 
-// Only tags that exist in content are valid. Without this, /tags/<any text> rendered a 200 page
-// with the URL text as its heading and title.
-export const dynamicParams = false;
-
 const safeDecode = (value: string) => {
   try {
     return decodeURIComponent(value);
@@ -18,17 +14,19 @@ const safeDecode = (value: string) => {
   }
 };
 
-const resolveTag = (value: string) => {
+// Only tags that exist in content are valid; anything else must 404 rather than render
+// a 200 page with the URL text as its heading and title.
+const resolveTag = async (value: string) => {
   const decoded = safeDecode(value);
   return decoded ? findTag(decoded) : null;
 };
 
-export function generateStaticParams() {
-  return getAllTags().map((tag) => ({ tag: tag.toLowerCase() }));
+export async function generateStaticParams() {
+  return (await getAllTags()).map((tag) => ({ tag: tag.toLowerCase() }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const tag = resolveTag((await params).tag);
+  const tag = await resolveTag((await params).tag);
   if (!tag) return {};
   return pageMetadata({
     title: `Articles tagged ${tag}`,
@@ -38,9 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function TagPage({ params }: Props) {
-  const tag = resolveTag((await params).tag);
+  const tag = await resolveTag((await params).tag);
   if (!tag) notFound();
-  const articles = articlesForTag(tag);
+  const articles = await articlesForTag(tag);
   return (
     <main className="section shell">
       <header className="archive-header"><p className="eyebrow">Topic</p><h1>{tag}</h1><p>{articles.length} archived {articles.length === 1 ? "article" : "articles"}.</p></header>

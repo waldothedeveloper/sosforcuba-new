@@ -1,13 +1,11 @@
 import { getAllArticles } from "@/lib/content";
 import { siteConfig } from "@/lib/site";
 
-// Content only changes on deploy, so prerender the feed instead of rebuilding it per request.
-export const dynamic = "force-static";
-
 const escapeXml = (value: string) => value.replace(/[<>&'\"]/g, (char) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", "\"": "&quot;" }[char] ?? char));
 
-export function GET() {
-  const items = getAllArticles()
+// Content only changes on deploy; getAllArticles is cached, so this handler prerenders at build.
+export async function GET() {
+  const items = (await getAllArticles())
     .map((article) => {
       const slug = encodeURIComponent(article.slug);
       return `<item><title>${escapeXml(article.title)}</title><link>${siteConfig.url}/articles/${slug}</link><guid>${siteConfig.url}/articles/${slug}</guid><pubDate>${new Date(`${article.date}T12:00:00Z`).toUTCString()}</pubDate><description>${escapeXml(article.description)}</description></item>`;

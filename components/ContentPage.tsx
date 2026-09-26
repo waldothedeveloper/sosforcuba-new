@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { MdxContent } from "@/components/MdxContent";
 import { getPage } from "@/lib/content";
 
-export function ContentPage({ slug }: { slug: string }) {
-  const page = getPage(slug);
+export async function ContentPage({ slug }: { slug: string }) {
+  const page = await getPage(slug);
   if (!page) notFound();
 
   return (
