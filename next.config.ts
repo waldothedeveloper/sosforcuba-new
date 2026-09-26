@@ -10,6 +10,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  cacheComponents: true,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

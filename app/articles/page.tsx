@@ -9,7 +9,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/articles"
 });
 
-export default function ArticlesPage() {
+export default async function ArticlesPage() {
   return (
     <main className="section shell">
       <header className="archive-header">
@@ -17,7 +17,7 @@ export default function ArticlesPage() {
         <h1>History, testimony, and context</h1>
         <p>Explore preserved reporting from the original SOS for Cuba project and new MDX articles as they are published.</p>
       </header>
-      <ArticleExplorer articles={getAllArticles()} />
+      <ArticleExplorer articles={await getAllArticles()} />
     </main>
   );
 }

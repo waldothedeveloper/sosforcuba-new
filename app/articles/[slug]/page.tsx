@@ -9,16 +9,14 @@ import { pageMetadata } from "@/lib/metadata";
 
 type Props = { params: Promise<{ slug: string }> };
 
-// Every article is known at build time; anything else should 404 without touching the filesystem.
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return getAllArticles().map(({ slug }) => ({ slug }));
+// Every article is prerendered at build time. Unknown slugs 404 via getArticle's allowlist.
+export async function generateStaticParams() {
+  return (await getAllArticles()).map(({ slug }) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = await getArticle(slug);
   if (!article) return {};
   return pageMetadata({
     title: article.title,
@@ -31,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = await getArticle(slug);
   if (!article) notFound();
 
   return (

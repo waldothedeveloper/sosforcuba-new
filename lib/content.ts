@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
+import { cacheLife } from "next/cache";
 
 const CONTENT_ROOT = path.join(process.cwd(), "content", "en");
 
@@ -74,7 +75,11 @@ function toMeta(article: Article): ArticleMeta {
   };
 }
 
-export function getAllArticles(): ArticleMeta[] {
+// Content only changes on deploy, so every reader below is cached for the life of the build ("max").
+// Each is async because `use cache` only applies to async functions.
+export async function getAllArticles(): Promise<ArticleMeta[]> {
+  "use cache";
+  cacheLife("max");
   const directory = path.join(CONTENT_ROOT, "articles");
   if (!fs.existsSync(directory)) return [];
 
@@ -91,14 +96,20 @@ export function getAllArticles(): ArticleMeta[] {
     .map(toMeta);
 }
 
-export function getArticle(slug: string): Article | null {
+// Slugs come from the URL. Only read files that are already in the published list, so unknown
+// or crafted slugs 404 without touching the filesystem (this replaced `dynamicParams = false`).
+export async function getArticle(slug: string): Promise<Article | null> {
+  "use cache";
+  cacheLife("max");
+  const known = (await getAllArticles()).some((article) => article.slug === slug);
+  if (!known) return null;
   const parsed = readMdx("articles", slug);
-  if (!parsed) return null;
-  const article = toArticle(slug, parsed.data, parsed.content);
-  return article.draft ? null : article;
+  return parsed ? toArticle(slug, parsed.data, parsed.content) : null;
 }
 
-export function getPage(slug: string): ContentPage | null {
+export async function getPage(slug: string): Promise<ContentPage | null> {
+  "use cache";
+  cacheLife("max");
   const parsed = readMdx("pages", slug);
   if (!parsed) return null;
   return {
@@ -110,18 +121,18 @@ export function getPage(slug: string): ContentPage | null {
   };
 }
 
-export function getAllTags() {
-  const tags = new Set(getAllArticles().flatMap((article) => article.tags));
+export async function getAllTags() {
+  const tags = new Set((await getAllArticles()).flatMap((article) => article.tags));
   return [...tags].sort((a, b) => a.localeCompare(b));
 }
 
 // Tag URLs are lowercased; recover the display casing used in frontmatter.
-export function findTag(tag: string) {
-  return getAllTags().find((candidate) => candidate.toLowerCase() === tag.toLowerCase()) ?? null;
+export async function findTag(tag: string) {
+  return (await getAllTags()).find((candidate) => candidate.toLowerCase() === tag.toLowerCase()) ?? null;
 }
 
-export function articlesForTag(tag: string) {
-  return getAllArticles().filter((article) =>
+export async function articlesForTag(tag: string) {
+  return (await getAllArticles()).filter((article) =>
     article.tags.some((candidate) => candidate.toLowerCase() === tag.toLowerCase())
   );
 }

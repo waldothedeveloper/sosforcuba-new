@@ -17,8 +17,8 @@ const facts = [
   { number: "∞", label: "Every Cuban voice deserves to be heard" }
 ];
 
-export default function HomePage() {
-  const articles = getAllArticles();
+export default async function HomePage() {
+  const articles = await getAllArticles();
   const latest = articles.slice(0, 3);
 
   return (
