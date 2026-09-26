@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { ArticleExplorer } from "@/components/ArticleExplorer";
 import { getAllArticles } from "@/lib/content";
+import { pageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Articles",
-  description: "Reporting, historical context, and advocacy about Cuba, July 11, political repression, and human rights."
-};
+  description: "Reporting, historical context, and advocacy about Cuba, July 11, political repression, and human rights.",
+  path: "/articles"
+});
 
 export default function ArticlesPage() {
   return (

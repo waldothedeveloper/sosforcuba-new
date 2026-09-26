@@ -5,8 +5,12 @@ import { notFound } from "next/navigation";
 import { formatDate } from "@/components/ArticleCard";
 import { MdxContent } from "@/components/MdxContent";
 import { getAllArticles, getArticle } from "@/lib/content";
+import { pageMetadata } from "@/lib/metadata";
 
 type Props = { params: Promise<{ slug: string }> };
+
+// Every article is known at build time; anything else should 404 without touching the filesystem.
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return getAllArticles().map(({ slug }) => ({ slug }));
@@ -16,19 +20,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const article = getArticle(slug);
   if (!article) return {};
-  return {
+  return pageMetadata({
     title: article.title,
     description: article.description,
-    alternates: { canonical: `/articles/${slug}` },
-    openGraph: {
-      type: "article",
-      title: article.title,
-      description: article.description,
-      publishedTime: article.date,
-      modifiedTime: article.updated,
-      images: [{ url: article.cover, alt: article.coverAlt }]
-    }
-  };
+    path: `/articles/${slug}`,
+    image: { url: article.cover, alt: article.coverAlt },
+    openGraph: { type: "article", publishedTime: article.date, modifiedTime: article.updated }
+  });
 }
 
 export default async function ArticlePage({ params }: Props) {
