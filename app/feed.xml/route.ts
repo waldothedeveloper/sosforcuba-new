@@ -1,6 +1,9 @@
 import { getAllArticles } from "@/lib/content";
 import { siteConfig } from "@/lib/site";
 
+// Content only changes on deploy, so prerender the feed instead of rebuilding it per request.
+export const dynamic = "force-static";
+
 const escapeXml = (value: string) => value.replace(/[<>&'\"]/g, (char) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", "\"": "&quot;" }[char] ?? char));
 
 export function GET() {

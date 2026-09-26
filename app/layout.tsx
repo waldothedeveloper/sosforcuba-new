@@ -27,27 +27,25 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
-  alternates: { canonical: "/", types: { "application/rss+xml": "/feed.xml" } },
+  // No canonical or og:url here: they would be inherited by every page. See lib/metadata.ts.
+  alternates: { types: { "application/rss+xml": "/feed.xml" } },
   openGraph: {
     type: "website",
     locale: siteConfig.locale,
-    url: siteConfig.url,
     siteName: siteConfig.name,
-    title: "SOS for Cuba",
+    title: siteConfig.name,
     description: siteConfig.description,
     images: [
       {
         url: "/media/legacy/sos_for_cuba_logo.jpg",
-        width: 1200,
-        height: 630,
+        width: 240,
+        height: 240,
         alt: "SOS for Cuba",
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: siteConfig.name,
-    description: siteConfig.description,
+    card: "summary",
   },
   icons: { icon: "/media/legacy/sos_cuba_logo_2.jpg" },
 };
@@ -61,7 +59,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
+    <html lang="en" className={`${sans.variable} ${serif.variable}`} data-scroll-behavior="smooth">
       <body>
         <a className="skip-link" href="#main-content">
           Skip to content

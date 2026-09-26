@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArticleCard } from "@/components/ArticleCard";
 import { getAllArticles } from "@/lib/content";
+import { pageMetadata } from "@/lib/metadata";
+import { siteConfig } from "@/lib/site";
+
+export const metadata: Metadata = {
+  ...pageMetadata({ title: siteConfig.name, description: siteConfig.description, path: "/" }),
+  title: { absolute: "SOS for Cuba — Freedom, dignity, and a voice" }
+};
 
 const facts = [
   { number: "1959", label: "The present political era began" },
@@ -48,7 +56,7 @@ export default function HomePage() {
       <section className="section shell">
         <div className="section-heading split-heading">
           <div><p className="eyebrow">Latest from the archive</p><h2>Stories that must remain visible</h2></div>
-          <Link className="text-link" href="/articles">Explore all articles <span>→</span></Link>
+          <Link className="text-link" href="/articles">Explore all articles <span aria-hidden="true">→</span></Link>
         </div>
         <div className="article-grid">
           {latest.map((article, index) => <ArticleCard article={article} priority={index === 0} key={article.slug} />)}
@@ -71,7 +79,7 @@ export default function HomePage() {
           <p className="eyebrow">A country spoke</p>
           <h2>July 11, 2021 changed the record forever.</h2>
           <p>From San Antonio de los Baños, demonstrations spread across the island. Cubans called for freedom, dignity, and an end to fear.</p>
-          <Link className="text-link" href="/articles/july-11-2021">Read the documented timeline <span>→</span></Link>
+          <Link className="text-link" href="/articles/july-11-2021">Read the documented timeline <span aria-hidden="true">→</span></Link>
         </div>
       </section>
     </main>

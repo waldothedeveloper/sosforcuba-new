@@ -35,13 +35,19 @@ function readMdx(directory: "articles" | "pages", slug: string) {
   return matter(file);
 }
 
+// YAML parses unquoted dates (date: 2021-07-12) into Date objects; keep everything as YYYY-MM-DD.
+function toDateString(value: unknown): string | undefined {
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value.toISOString().slice(0, 10);
+  return value ? String(value) : undefined;
+}
+
 function toArticle(slug: string, data: Record<string, unknown>, body = ""): Article {
   return {
     slug,
     title: String(data.title ?? slug),
     description: String(data.description ?? ""),
-    date: String(data.date ?? "2021-07-11"),
-    updated: data.updated ? String(data.updated) : undefined,
+    date: toDateString(data.date) ?? "2021-07-11",
+    updated: toDateString(data.updated),
     author: String(data.author ?? "SOS for Cuba"),
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
     cover: String(data.cover ?? "/media/legacy/sos_for_cuba_logo.jpg"),
@@ -107,6 +113,11 @@ export function getPage(slug: string): ContentPage | null {
 export function getAllTags() {
   const tags = new Set(getAllArticles().flatMap((article) => article.tags));
   return [...tags].sort((a, b) => a.localeCompare(b));
+}
+
+// Tag URLs are lowercased; recover the display casing used in frontmatter.
+export function findTag(tag: string) {
+  return getAllTags().find((candidate) => candidate.toLowerCase() === tag.toLowerCase()) ?? null;
 }
 
 export function articlesForTag(tag: string) {

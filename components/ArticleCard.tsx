@@ -5,7 +5,7 @@ import type { ArticleMeta } from "@/lib/content";
 export function ArticleCard({ article, priority = false }: { article: ArticleMeta; priority?: boolean }) {
   return (
     <article className="article-card">
-      <Link className="card-image" href={`/articles/${article.slug}`} aria-label={article.title}>
+      <Link className="card-image" href={`/articles/${article.slug}`} tabIndex={-1} aria-hidden="true">
         <Image
           src={article.cover}
           alt={article.coverAlt}
@@ -21,7 +21,7 @@ export function ArticleCard({ article, priority = false }: { article: ArticleMet
         </div>
         <h3><Link href={`/articles/${article.slug}`}>{article.title}</Link></h3>
         <p>{article.description}</p>
-        <Link className="text-link" href={`/articles/${article.slug}`}>Read article <span>→</span></Link>
+        <Link className="text-link" href={`/articles/${article.slug}`}>Read article <span aria-hidden="true">→</span></Link>
       </div>
     </article>
   );

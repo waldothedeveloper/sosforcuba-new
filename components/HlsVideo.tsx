@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Hls from "hls.js";
+import type Hls from "hls.js";
 
 export function Video({ src, poster, title }: { src: string; poster?: string; title: string }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -15,11 +15,19 @@ export function Video({ src, poster, title }: { src: string; poster?: string; ti
       return;
     }
 
-    if (!Hls.isSupported()) return;
-    const hls = new Hls({ enableWorker: true });
-    hls.loadSource(src);
-    hls.attachMedia(video);
-    return () => hls.destroy();
+    // hls.js is ~185 KB gzipped; load it only for browsers without native HLS (not Safari/iOS).
+    let hls: Hls | undefined;
+    let cancelled = false;
+    import("hls.js").then(({ default: HlsPlayer }) => {
+      if (cancelled || !HlsPlayer.isSupported()) return;
+      hls = new HlsPlayer({ enableWorker: true });
+      hls.loadSource(src);
+      hls.attachMedia(video);
+    });
+    return () => {
+      cancelled = true;
+      hls?.destroy();
+    };
   }, [src]);
 
   return (
