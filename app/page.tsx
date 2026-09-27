@@ -24,7 +24,6 @@ export default async function HomePage() {
   return (
     <main>
       <section className="hero">
-        <div className="flag-stripe" aria-hidden="true" />
         <div className="shell hero-grid">
           <div className="hero-copy">
             <p className="eyebrow light">Independent Cuban advocacy</p>
@@ -40,7 +39,6 @@ export default async function HomePage() {
           <div className="hero-collage" aria-label="Scenes from Cuban protests and civic life">
             <div className="portrait portrait-main"><Image src="/media/legacy/girl_protesting.jpg" alt="A young woman protesting for freedom in Cuba" fill priority sizes="(max-width: 800px) 80vw, 34vw" /></div>
             <div className="portrait portrait-small"><Image src="/media/legacy/sos_pic_3.jpg" alt="A demonstrator holding a Cuban flag" fill sizes="(max-width: 800px) 42vw, 18vw" /></div>
-            <p className="photo-note">The truth survives when people keep telling it.</p>
           </div>
         </div>
       </section>

@@ -1,3 +1,78 @@
+# Newsroom Redesign Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Restyle the SOS for Cuba site in a calm newsroom style using Newsreader + Instrument Sans, with no content or routing changes.
+
+**Architecture:** Fonts are swapped in `app/layout.tsx` via `next/font/google` (same CSS variable names `--font-serif` / `--font-sans`). `app/globals.css` is rewritten around a token layer (color + fluid type scale), preserving every class name the existing markup uses. Two decorative elements are removed from `app/page.tsx`.
+
+**Tech Stack:** Next.js 16 App Router, React 19, plain global CSS, `next/font/google`.
+
+**Spec:** `docs/superpowers/specs/2026-09-26-newsroom-redesign-design.md`
+
+## Global Constraints
+
+- Fonts: Newsreader (`axes: ["opsz"]`, styles normal + italic) → `--font-serif`; Instrument Sans → `--font-sans`.
+- Single accent red `#C8102E`; red text on paper uses `#9E0C24`. Paper `#FAF8F4`, ink `#111418`.
+- No drop shadows. No dark mode (`colorScheme: "light"` stays).
+- Keep all existing class names used in `app/` and `components/`.
+- There is no test runner in this repo; verification = `npm run typecheck`, `npm run lint`, `npm run build`, plus browser checks.
+
+---
+
+### Task 1: Swap fonts and theme color
+
+**Files:**
+- Modify: `app/layout.tsx:3-20` (font imports/instances), `app/layout.tsx` `viewport.themeColor`
+
+**Interfaces:**
+- Produces: CSS variables `--font-serif` (Newsreader) and `--font-sans` (Instrument Sans) on `<html>`, consumed by Task 2.
+
+- [ ] **Step 1: Replace font imports and instances**
+
+```tsx
+import { Instrument_Sans, Newsreader } from "next/font/google";
+
+const sans = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+const serif = Newsreader({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
+  variable: "--font-serif",
+  display: "swap",
+});
+```
+
+- [ ] **Step 2: Update theme color**
+
+```tsx
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#FAF8F4",
+};
+```
+
+- [ ] **Step 3: Verify** — Run `npm run typecheck`. Expected: exit 0.
+
+- [ ] **Step 4: Commit** — `git commit -am "Switch fonts to Newsreader and Instrument Sans"`
+
+### Task 2: Rewrite globals.css
+
+**Files:**
+- Modify (full replace): `app/globals.css`
+
+**Interfaces:**
+- Consumes: `--font-serif`, `--font-sans` from Task 1.
+- Produces: styles for every existing class; no class removed except `.flag-stripe` and `.photo-note` (their markup is removed in Task 3).
+
+- [ ] **Step 1: Replace `app/globals.css` with exactly this content**
+
+<!-- BEGIN globals.css -->
+```css
 :root {
   --paper: #faf8f4;
   --surface: #ffffff;
@@ -47,7 +122,7 @@ p { text-wrap: pretty; }
 
 /* Header */
 .site-header { position: sticky; top: 0; z-index: 50; background: rgba(250, 248, 244, 0.94); border-bottom: 1px solid var(--rule); backdrop-filter: saturate(1.4) blur(12px); }
-.site-header::before { content: ""; display: block; height: 4px; background: linear-gradient(to right, var(--red) 0 22%, var(--blue) 22%); }
+.site-header::before { content: ""; display: block; height: 4px; background: linear-gradient(to right, var(--blue) 0 33.33%, var(--paper) 33.33% 66.66%, var(--red) 66.66%); }
 .header-inner { min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
 .wordmark { display: inline-flex; align-items: baseline; gap: 7px; text-decoration: none; font-family: var(--serif); font-size: 23px; font-weight: 500; letter-spacing: -0.01em; }
 .wordmark-mark { font-weight: 700; letter-spacing: 0.06em; box-shadow: inset 0 -3px 0 var(--red); }
@@ -237,3 +312,31 @@ p { text-wrap: pretty; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+```
+<!-- END globals.css -->
+
+- [ ] **Step 2: Verify build** — Run `npm run build`. Expected: build succeeds.
+
+- [ ] **Step 3: Commit** — `git commit -am "Rewrite global styles for newsroom redesign"`
+
+### Task 3: Remove retired decorative markup
+
+**Files:**
+- Modify: `app/page.tsx` (hero section)
+
+- [ ] **Step 1: Delete the flag stripe element** — remove the line
+  `<div className="flag-stripe" aria-hidden="true" />`
+
+- [ ] **Step 2: Delete the photo note** — remove the line
+  `<p className="photo-note">The truth survives when people keep telling it.</p>`
+
+- [ ] **Step 3: Verify** — `npm run typecheck && npm run lint`. Expected: exit 0, no warnings. `grep -rn "flag-stripe\|photo-note" app components` returns nothing.
+
+- [ ] **Step 4: Commit** — `git commit -am "Remove retired hero decorations"`
+
+### Task 4: Visual verification
+
+- [ ] **Step 1:** Start the dev server (`npm run dev`) via the browser pane.
+- [ ] **Step 2:** At desktop width, screenshot `/`, `/articles`, `/articles/cuban-government-response`, `/july-11`, and `/does-not-exist`.
+- [ ] **Step 3:** At 375px width, check `/` and an article page. Confirm `document.documentElement.scrollWidth <= innerWidth` (no horizontal scroll) and open the mobile menu.
+- [ ] **Step 4:** Fix any issues found in `app/globals.css`, re-run `npm run build`, commit.

@@ -1,6 +1,6 @@
 import "./globals.css";
 
-import { Libre_Franklin, Source_Serif_4 } from "next/font/google";
+import { Instrument_Sans, Newsreader } from "next/font/google";
 import type { Metadata, Viewport } from "next";
 
 import { SiteFooter } from "@/components/SiteFooter";
@@ -8,13 +8,15 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { siteConfig } from "@/lib/site";
 
-const sans = Libre_Franklin({
+const sans = Instrument_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
 });
-const serif = Source_Serif_4({
+const serif = Newsreader({
   subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
   variable: "--font-serif",
   display: "swap",
 });
@@ -52,7 +54,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "light",
-  themeColor: "#071724",
+  themeColor: "#FAF8F4",
 };
 
 export default function RootLayout({
