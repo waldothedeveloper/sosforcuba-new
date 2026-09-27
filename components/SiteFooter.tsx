@@ -27,7 +27,6 @@ export async function SiteFooter() {
       </div>
       <div className="shell footer-meta">
         <span>© {await currentYear()} SOS for Cuba</span>
-        <span>English edition · Spanish-ready architecture</span>
       </div>
     </footer>
   );
