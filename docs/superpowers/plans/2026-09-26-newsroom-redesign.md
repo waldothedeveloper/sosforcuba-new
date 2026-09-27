@@ -1,0 +1,342 @@
+# Newsroom Redesign Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Restyle the SOS for Cuba site in a calm newsroom style using Newsreader + Instrument Sans, with no content or routing changes.
+
+**Architecture:** Fonts are swapped in `app/layout.tsx` via `next/font/google` (same CSS variable names `--font-serif` / `--font-sans`). `app/globals.css` is rewritten around a token layer (color + fluid type scale), preserving every class name the existing markup uses. Two decorative elements are removed from `app/page.tsx`.
+
+**Tech Stack:** Next.js 16 App Router, React 19, plain global CSS, `next/font/google`.
+
+**Spec:** `docs/superpowers/specs/2026-09-26-newsroom-redesign-design.md`
+
+## Global Constraints
+
+- Fonts: Newsreader (`axes: ["opsz"]`, styles normal + italic) → `--font-serif`; Instrument Sans → `--font-sans`.
+- Single accent red `#C8102E`; red text on paper uses `#9E0C24`. Paper `#FAF8F4`, ink `#111418`.
+- No drop shadows. No dark mode (`colorScheme: "light"` stays).
+- Keep all existing class names used in `app/` and `components/`.
+- There is no test runner in this repo; verification = `npm run typecheck`, `npm run lint`, `npm run build`, plus browser checks.
+
+---
+
+### Task 1: Swap fonts and theme color
+
+**Files:**
+- Modify: `app/layout.tsx:3-20` (font imports/instances), `app/layout.tsx` `viewport.themeColor`
+
+**Interfaces:**
+- Produces: CSS variables `--font-serif` (Newsreader) and `--font-sans` (Instrument Sans) on `<html>`, consumed by Task 2.
+
+- [ ] **Step 1: Replace font imports and instances**
+
+```tsx
+import { Instrument_Sans, Newsreader } from "next/font/google";
+
+const sans = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+const serif = Newsreader({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
+  variable: "--font-serif",
+  display: "swap",
+});
+```
+
+- [ ] **Step 2: Update theme color**
+
+```tsx
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#FAF8F4",
+};
+```
+
+- [ ] **Step 3: Verify** — Run `npm run typecheck`. Expected: exit 0.
+
+- [ ] **Step 4: Commit** — `git commit -am "Switch fonts to Newsreader and Instrument Sans"`
+
+### Task 2: Rewrite globals.css
+
+**Files:**
+- Modify (full replace): `app/globals.css`
+
+**Interfaces:**
+- Consumes: `--font-serif`, `--font-sans` from Task 1.
+- Produces: styles for every existing class; no class removed except `.flag-stripe` and `.photo-note` (their markup is removed in Task 3).
+
+- [ ] **Step 1: Replace `app/globals.css` with exactly this content**
+
+<!-- BEGIN globals.css -->
+```css
+:root {
+  --paper: #faf8f4;
+  --surface: #ffffff;
+  --ink: #111418;
+  --ink-2: #4a4f55;
+  --ink-3: #6b7075;
+  --rule: rgba(17, 20, 24, 0.12);
+  --rule-strong: rgba(17, 20, 24, 0.28);
+  --red: #c8102e;
+  --red-deep: #9e0c24;
+  --blue: #1f4e8c;
+  --on-ink: #f3f1ec;
+  --on-ink-2: #aab0b6;
+
+  --serif: var(--font-serif), Georgia, "Times New Roman", serif;
+  --sans: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --step--1: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-0: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --step-1: clamp(1.1875rem, 1.12rem + 0.3vw, 1.3125rem);
+  --step-2: clamp(1.5rem, 1.38rem + 0.5vw, 1.75rem);
+  --step-3: clamp(1.875rem, 1.6rem + 1.2vw, 2.5rem);
+  --step-4: clamp(2.5rem, 1.95rem + 2.4vw, 3.75rem);
+  --step-5: clamp(2.875rem, 1.9rem + 4.2vw, 5.25rem);
+
+  --measure: 68ch;
+}
+
+/* Base */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--sans); font-size: var(--step-0); line-height: 1.55; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+img { display: block; max-width: 100%; }
+button, input { font: inherit; }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+::selection { background: rgba(200, 16, 46, 0.18); }
+
+.shell { width: min(1200px, calc(100% - 48px)); margin-inline: auto; }
+.shell.narrow { width: min(780px, calc(100% - 48px)); }
+.skip-link { position: fixed; z-index: 100; top: 8px; left: 8px; transform: translateY(-160%); padding: 10px 16px; color: var(--on-ink); background: var(--ink); font-weight: 600; }
+.skip-link:focus { transform: none; }
+
+.eyebrow { margin: 0 0 16px; color: var(--red-deep); font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+
+/* Header */
+.site-header { position: sticky; top: 0; z-index: 50; background: rgba(250, 248, 244, 0.94); border-bottom: 1px solid var(--rule); backdrop-filter: saturate(1.4) blur(12px); }
+.site-header::before { content: ""; display: block; height: 4px; background: linear-gradient(to right, var(--blue) 0 33.33%, var(--paper) 33.33% 66.66%, var(--red) 66.66%); }
+.header-inner { min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.wordmark { display: inline-flex; align-items: baseline; gap: 7px; text-decoration: none; font-family: var(--serif); font-size: 23px; font-weight: 500; letter-spacing: -0.01em; }
+.wordmark-mark { font-weight: 700; letter-spacing: 0.06em; box-shadow: inset 0 -3px 0 var(--red); }
+.desktop-nav { display: flex; align-items: center; gap: 30px; }
+.desktop-nav a { padding-block: 6px; color: var(--ink-2); text-decoration: none; font-size: 15px; font-weight: 500; }
+.desktop-nav a:hover { color: var(--ink); }
+.desktop-nav a[aria-current="page"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--red); }
+.mobile-nav { display: none; position: relative; }
+.mobile-nav summary { cursor: pointer; padding: 8px 14px; border: 1px solid var(--rule-strong); font-size: 14px; font-weight: 600; list-style: none; }
+.mobile-nav summary::-webkit-details-marker { display: none; }
+.mobile-nav[open] summary { color: var(--on-ink); background: var(--ink); border-color: var(--ink); }
+.mobile-nav nav { position: absolute; right: 0; top: 48px; width: 230px; display: grid; padding: 8px; background: var(--paper); border: 1px solid var(--rule-strong); }
+.mobile-nav nav a { padding: 12px; text-decoration: none; font-weight: 500; }
+.mobile-nav nav a + a { border-top: 1px solid var(--rule); }
+.mobile-nav nav a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--red); }
+
+/* Buttons and links */
+.button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border: 1px solid transparent; text-decoration: none; font-family: var(--sans); font-size: 15px; font-weight: 600; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+.button.primary { color: var(--on-ink); background: var(--ink); }
+.button.primary:hover { background: #2a2f35; }
+.button.secondary, .button.ink { color: var(--ink); border-color: var(--ink); }
+.button.secondary:hover, .button.ink:hover { color: var(--on-ink); background: var(--ink); }
+.text-link { display: inline-flex; gap: 8px; align-items: center; color: var(--ink); text-decoration: none; font-family: var(--sans); font-size: 15px; font-weight: 600; box-shadow: inset 0 -2px 0 var(--red); padding-bottom: 2px; }
+.text-link:hover { color: var(--red-deep); }
+
+/* Home: hero */
+.hero { border-bottom: 1px solid var(--rule); }
+.hero-grid { min-height: 640px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 72px; align-items: center; padding-block: 88px; }
+.hero h1 { max-width: 13ch; margin: 0; font-family: var(--serif); font-size: var(--step-5); font-weight: 500; line-height: 1; letter-spacing: -0.025em; }
+.hero-lede { max-width: 34em; margin: 28px 0 0; color: var(--ink-2); font-family: var(--serif); font-size: var(--step-1); line-height: 1.55; }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: 36px; }
+.hero .button.secondary { min-height: 0; padding: 0 0 3px; border: 0; background: none; color: var(--ink); box-shadow: inset 0 -2px 0 var(--red); }
+.hero .button.secondary:hover { color: var(--red-deep); }
+.hero-collage { position: relative; height: 520px; }
+.portrait { position: absolute; overflow: hidden; background: var(--rule); }
+.portrait img { object-fit: cover; }
+.portrait-main { inset: 0 18% 56px 0; }
+.portrait-small { width: 46%; height: 44%; right: 0; bottom: 0; border: 8px solid var(--paper); }
+
+/* Home: facts */
+.fact-ribbon { border-bottom: 1px solid var(--rule); }
+.fact-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+.fact-grid > div { display: flex; align-items: baseline; gap: 18px; padding: 34px 28px; }
+.fact-grid > div:first-child { padding-left: 0; }
+.fact-grid > div + div { border-left: 1px solid var(--rule); }
+.fact-grid strong { font-family: var(--serif); font-size: var(--step-4); font-weight: 500; line-height: 1; letter-spacing: -0.02em; }
+.fact-grid span { max-width: 180px; color: var(--ink-2); font-size: var(--step--1); line-height: 1.45; }
+
+/* Sections */
+.section { padding-block: 104px; }
+.section-heading { margin-bottom: 44px; }
+.section-heading h2, .manifesto h2, .history-feature h2 { margin: 0; font-family: var(--serif); font-size: var(--step-3); font-weight: 500; line-height: 1.08; letter-spacing: -0.02em; }
+.split-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--ink); }
+
+/* Article cards */
+.article-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px 40px; }
+.article-card { display: flex; flex-direction: column; }
+.card-image { position: relative; display: block; aspect-ratio: 3 / 2; overflow: hidden; background: var(--rule); }
+.card-image img { object-fit: cover; transition: transform 0.5s ease; }
+.article-card:hover .card-image img { transform: scale(1.03); }
+.card-body { display: flex; flex: 1; flex-direction: column; padding-top: 18px; }
+.card-meta { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--rule); color: var(--ink-3); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.card-meta span { color: var(--red-deep); }
+.card-body h3 { margin: 0; font-family: var(--serif); font-size: var(--step-2); font-weight: 500; line-height: 1.15; letter-spacing: -0.01em; }
+.card-body h3 a { text-decoration: none; }
+.card-body h3 a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.card-body p { flex: 1; margin: 12px 0 20px; color: var(--ink-2); font-size: 15px; line-height: 1.6; }
+.card-body .text-link { align-self: flex-start; font-size: 14px; }
+
+/* Home: manifesto */
+.manifesto { color: var(--on-ink); background: var(--ink); }
+.manifesto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 96px; padding-block: 96px; }
+.manifesto .eyebrow { color: #ff8a94; }
+.manifesto h2 { font-size: var(--step-4); }
+.manifesto p:not(.eyebrow) { margin: 0 0 32px; color: var(--on-ink-2); font-family: var(--serif); font-size: var(--step-1); line-height: 1.6; }
+.manifesto .button.secondary { color: var(--on-ink); border-color: rgba(243, 241, 236, 0.5); }
+.manifesto .button.secondary:hover { color: var(--ink); background: var(--on-ink); border-color: var(--on-ink); }
+
+/* Home: history feature */
+.history-feature { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+.history-image { position: relative; min-height: 440px; background: var(--rule); }
+.history-image img { object-fit: cover; }
+.history-feature p:not(.eyebrow) { margin: 20px 0 28px; color: var(--ink-2); font-family: var(--serif); font-size: var(--step-1); line-height: 1.6; }
+
+/* Archive and page heroes */
+.archive-header, .page-hero, .article-header { padding-top: 88px; padding-bottom: 48px; }
+.archive-header { max-width: 820px; }
+.archive-header h1, .page-hero h1, .not-found h1 { margin: 0; font-family: var(--serif); font-size: var(--step-4); font-weight: 500; line-height: 1.04; letter-spacing: -0.025em; }
+.archive-header > p:last-child, .page-hero > p:last-child { max-width: 36em; margin: 22px 0 0; color: var(--ink-2); font-family: var(--serif); font-size: var(--step-1); line-height: 1.55; }
+.page-hero { border-bottom: 1px solid var(--rule); }
+.article-tools { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--rule); }
+.article-tools label span { display: block; margin-bottom: 10px; color: var(--ink-3); font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.article-tools input { width: 100%; padding: 14px 16px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 0; outline: none; font-size: 16px; }
+.article-tools input:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(17, 20, 24, 0.1); }
+.tag-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.tag-filter button { cursor: pointer; padding: 7px 14px; color: var(--ink-2); background: transparent; border: 1px solid var(--rule-strong); border-radius: 999px; font-size: 13px; font-weight: 500; transition: background-color 0.2s, color 0.2s; }
+.tag-filter button:hover { color: var(--ink); border-color: var(--ink); }
+.tag-filter button[aria-pressed="true"] { color: var(--on-ink); background: var(--ink); border-color: var(--ink); }
+.results-count { margin: 0 0 28px; color: var(--ink-3); font-size: var(--step--1); }
+.empty-state { padding: 64px 20px; text-align: center; color: var(--ink-2); font-family: var(--serif); font-size: var(--step-1); }
+
+/* Article page */
+.back-link { display: inline-block; margin-bottom: 36px; color: var(--ink-3); font-size: 14px; font-weight: 500; text-decoration: none; }
+.back-link:hover { color: var(--ink); }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 20px; }
+.tag-row a { color: var(--red-deep); text-decoration: none; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.tag-row a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.article-header h1 { margin: 0; font-family: var(--serif); font-size: var(--step-5); font-weight: 500; line-height: 1.02; letter-spacing: -0.025em; }
+.article-deck { margin: 24px 0 0; color: var(--ink-2); font-family: var(--serif); font-size: var(--step-1); line-height: 1.5; }
+.byline { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--ink-3); font-size: 14px; }
+.byline span:first-child { color: var(--ink); font-weight: 600; }
+.article-cover { max-height: 700px; overflow: hidden; background: var(--rule); }
+.article-cover img { width: 100%; height: auto; max-height: 700px; object-fit: cover; }
+
+/* Prose */
+.prose { padding-top: 64px; padding-bottom: 112px; font-family: var(--serif); font-size: var(--step-1); line-height: 1.65; }
+.prose > * { max-width: var(--measure); margin-inline: auto; }
+.prose h2, .prose h3 { color: var(--ink); font-family: var(--sans); font-weight: 600; line-height: 1.2; letter-spacing: -0.015em; }
+.prose h2 { margin-top: 64px; margin-bottom: 18px; font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem); }
+.prose h3 { margin-top: 44px; margin-bottom: 14px; font-size: clamp(1.25rem, 1.15rem + 0.4vw, 1.4375rem); }
+.prose p { margin-top: 0; margin-bottom: 1.2em; }
+.prose a { color: var(--ink); text-decoration-color: var(--red); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.prose a:hover { color: var(--red-deep); }
+.prose strong { font-weight: 600; }
+.prose blockquote { margin-top: 44px; margin-bottom: 44px; padding: 4px 0 4px 28px; color: var(--ink); border-left: 3px solid var(--red); font-size: var(--step-2); font-style: italic; line-height: 1.4; }
+.prose blockquote p:last-child { margin-bottom: 0; }
+.prose ul, .prose ol { margin-top: 0; margin-bottom: 1.4em; padding-left: 1.4em; }
+.prose li { margin-bottom: 0.5em; padding-left: 0.3em; }
+.prose li::marker { color: var(--ink-3); }
+.prose hr { margin-block: 56px; border: 0; border-top: 1px solid var(--rule); }
+.media-figure, .video-figure { max-width: 960px; margin: 48px auto; }
+.media-figure img { width: 100%; height: auto; background: var(--rule); }
+.media-figure figcaption, .video-figure figcaption { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--rule); color: var(--ink-3); font-family: var(--sans); font-size: var(--step--1); line-height: 1.5; }
+.video-figure video { width: 100%; min-height: 380px; background: #000; }
+.callout { margin-top: 40px; margin-bottom: 40px; padding: 24px 28px; background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--blue); }
+.callout strong { display: block; margin-bottom: 8px; color: var(--blue); font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.callout p:last-child { margin-bottom: 0; }
+.source-link { font-family: var(--sans); font-size: 15px; font-weight: 600; }
+
+/* 404 */
+.not-found { min-height: 65vh; padding-block: 120px; }
+.not-found > p:not(.eyebrow) { color: var(--ink-2); font-family: var(--serif); font-size: var(--step-1); }
+.not-found .button { margin: 14px 10px 0 0; }
+
+/* Footer */
+.site-footer { color: var(--on-ink-2); background: var(--ink); }
+.footer-grid { display: grid; grid-template-columns: 1fr 0.7fr; gap: 72px; padding-block: 80px 64px; }
+.footer-kicker { margin: 0 0 16px; color: #ff8a94; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+.site-footer h2 { max-width: 16ch; margin: 0; color: var(--on-ink); font-family: var(--serif); font-size: var(--step-3); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; }
+.footer-links { display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 16px 24px; }
+.footer-links a { text-decoration: none; font-size: 15px; }
+.footer-links a:hover { color: var(--on-ink); text-decoration: underline; text-underline-offset: 3px; }
+.footer-meta { display: flex; justify-content: space-between; gap: 20px; padding-block: 22px; border-top: 1px solid rgba(243, 241, 236, 0.14); color: #7d848b; font-size: 13px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .desktop-nav { display: none; }
+  .mobile-nav { display: block; }
+  .hero-grid, .manifesto-grid, .history-feature { grid-template-columns: 1fr; }
+  .hero-grid { min-height: 0; padding-block: 64px; gap: 44px; }
+  .hero-collage { height: 460px; }
+  .article-grid { grid-template-columns: 1fr 1fr; }
+  .fact-grid { grid-template-columns: 1fr; }
+  .fact-grid > div { padding: 22px 0; }
+  .fact-grid > div + div { border-left: 0; border-top: 1px solid var(--rule); }
+  .manifesto-grid { gap: 32px; padding-block: 72px; }
+}
+
+@media (max-width: 620px) {
+  .shell, .shell.narrow { width: calc(100% - 32px); }
+  .header-inner { min-height: 60px; }
+  .hero-actions .button.primary { width: 100%; }
+  .hero-collage { height: 360px; }
+  .section { padding-block: 72px; }
+  .split-heading { align-items: start; flex-direction: column; }
+  .article-grid { grid-template-columns: 1fr; gap: 48px; }
+  .archive-header, .page-hero, .article-header { padding-top: 56px; }
+  .prose { padding-top: 44px; }
+  .prose blockquote { padding-left: 18px; }
+  .video-figure video { min-height: 220px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 36px; }
+  .footer-links { grid-template-columns: 1fr; }
+  .footer-meta { flex-direction: column; gap: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+```
+<!-- END globals.css -->
+
+- [ ] **Step 2: Verify build** — Run `npm run build`. Expected: build succeeds.
+
+- [ ] **Step 3: Commit** — `git commit -am "Rewrite global styles for newsroom redesign"`
+
+### Task 3: Remove retired decorative markup
+
+**Files:**
+- Modify: `app/page.tsx` (hero section)
+
+- [ ] **Step 1: Delete the flag stripe element** — remove the line
+  `<div className="flag-stripe" aria-hidden="true" />`
+
+- [ ] **Step 2: Delete the photo note** — remove the line
+  `<p className="photo-note">The truth survives when people keep telling it.</p>`
+
+- [ ] **Step 3: Verify** — `npm run typecheck && npm run lint`. Expected: exit 0, no warnings. `grep -rn "flag-stripe\|photo-note" app components` returns nothing.
+
+- [ ] **Step 4: Commit** — `git commit -am "Remove retired hero decorations"`
+
+### Task 4: Visual verification
+
+- [ ] **Step 1:** Start the dev server (`npm run dev`) via the browser pane.
+- [ ] **Step 2:** At desktop width, screenshot `/`, `/articles`, `/articles/cuban-government-response`, `/july-11`, and `/does-not-exist`.
+- [ ] **Step 3:** At 375px width, check `/` and an article page. Confirm `document.documentElement.scrollWidth <= innerWidth` (no horizontal scroll) and open the mobile menu.
+- [ ] **Step 4:** Fix any issues found in `app/globals.css`, re-run `npm run build`, commit.
