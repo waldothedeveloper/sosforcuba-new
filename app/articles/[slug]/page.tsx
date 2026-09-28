@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/components/ArticleCard";
+import { ArticleJsonLd } from "@/components/JsonLd";
 import { MdxContent } from "@/components/MdxContent";
 import { getAllArticles, getArticle } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await getArticle(slug);
   if (!article) return {};
   return pageMetadata({
-    title: article.title,
+    title: article.seoTitle ?? article.title,
     description: article.description,
     path: `/articles/${slug}`,
     image: { url: article.cover, alt: article.coverAlt },
@@ -34,6 +35,7 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <main>
+      <ArticleJsonLd article={article} />
       <article>
         <header className="article-header shell narrow">
           <Link className="back-link" href="/articles">← All articles</Link>

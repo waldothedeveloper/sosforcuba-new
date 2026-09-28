@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArticleCard } from "@/components/ArticleCard";
+import { SiteJsonLd } from "@/components/JsonLd";
 import { getAllArticles } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
 import { siteConfig } from "@/lib/site";
@@ -23,6 +24,7 @@ export default async function HomePage() {
 
   return (
     <main>
+      <SiteJsonLd />
       <section className="hero">
         <div className="shell hero-grid">
           <div className="hero-copy">

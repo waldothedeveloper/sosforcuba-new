@@ -8,6 +8,8 @@ const CONTENT_ROOT = path.join(process.cwd(), "content", "en");
 export type ArticleMeta = {
   slug: string;
   title: string;
+  // Shorter <title> for search results when the headline is too long; falls back to `title`.
+  seoTitle?: string;
   description: string;
   date: string;
   updated?: string;
@@ -46,6 +48,7 @@ function toArticle(slug: string, data: Record<string, unknown>, body = ""): Arti
   return {
     slug,
     title: String(data.title ?? slug),
+    seoTitle: data.seoTitle ? String(data.seoTitle) : undefined,
     description: String(data.description ?? ""),
     date: toDateString(data.date) ?? "2021-07-11",
     updated: toDateString(data.updated),
@@ -63,6 +66,7 @@ function toMeta(article: Article): ArticleMeta {
   return {
     slug: article.slug,
     title: article.title,
+    seoTitle: article.seoTitle,
     description: article.description,
     date: article.date,
     updated: article.updated,
