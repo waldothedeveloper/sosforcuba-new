@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!tag) return {};
   return pageMetadata({
     title: `Articles tagged ${tag}`,
-    description: `Archived SOS for Cuba reporting and context about ${tag}.`,
+    description: `Articles about ${tag} from the SOS for Cuba archive: reporting, testimony, and historical context on freedom and human rights in Cuba.`,
     path: `/tags/${encodeURIComponent(tag.toLowerCase())}`
   });
 }
