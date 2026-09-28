@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = "https://www.sosforcuba.com";
+const DEFAULT_SITE_URL = "https://sosforcuba.com";
 
 // Tolerates an unset/empty env var and a value missing its scheme, so `new URL()` never throws at build time.
 function resolveSiteUrl(raw: string | undefined): string {
@@ -17,8 +17,8 @@ export const siteConfig = {
   shortName: "SOS Cuba",
   description:
     "Independent advocacy and historical context about freedom, human rights, and civic life in Cuba.",
-  url: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
+  url: resolveSiteUrl(DEFAULT_SITE_URL),
   email: "info@sosforcuba.com",
   locale: "en_US",
-  language: "en"
+  language: "en",
 } as const;
